@@ -75,6 +75,9 @@ export default function Home() {
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
+      localVideoRef.current.onloadedmetadata = () => {
+        localVideoRef.current?.play();
+      };
     }
   }
 
