@@ -31,13 +31,19 @@ export default function Home() {
     if (pc) {
       socket.on("offer-event", async (offer) => {
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        console.log("receive offer => ", offer);
 
         if (offer.type === "offer") {
+          console.log("receive offer => ", offer);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
-          console.log(answer);
           socket.emit("offer-event", answer);
+          console.log("send answer => ", answer);
+        }
+
+        if (offer.type === "answer") {
+          console.log("received answer => ", offer);
         }
         // console.log("offer => ", offer);
         // console.log("type => ", pc.remoteDescription, pc);
@@ -97,9 +103,9 @@ export default function Home() {
     // fuck await
     await pc.setLocalDescription(offer);
 
-    console.log(offer, pc.localDescription);
-
     socket.emit("offer-event", offer);
+
+    console.log("send offer => ", offer);
   }
 
   return (
