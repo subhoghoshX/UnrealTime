@@ -74,15 +74,19 @@ export default function Home() {
       pc.addTrack(track, localStream);
     });
 
-    pc.ontrack = (track) => {
-      remoteStream = track.streams[0];
+    pc.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+      // remoteStream = track.streams[0];
     };
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
-      localVideoRef.current.onloadedmetadata = () => {
-        localVideoRef.current?.play();
-      };
+    }
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
     }
   }
 
@@ -115,8 +119,8 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-        <video className="bg-red-500" ref={localVideoRef}></video>
-        <video className="bg-green-500" ref={remoteVideoRef}></video>
+        <video autoPlay className="bg-red-500" ref={localVideoRef}></video>
+        <video autoPlay className="bg-green-500" ref={remoteVideoRef}></video>
         <button className="bg-blue-500 px-4 py-2" onClick={getMedia}>
           Cam & Audio
         </button>
