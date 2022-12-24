@@ -31,7 +31,6 @@ export default function Home() {
     if (pc) {
       socket.on("offer-event", async (offer) => {
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        console.log("receive offer => ", offer);
 
         if (offer.type === "offer") {
           console.log("receive offer => ", offer);
