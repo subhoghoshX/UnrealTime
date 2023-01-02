@@ -9,7 +9,7 @@ let remoteStream: MediaStream;
 
 export default function Home() {
   const [pc, setPc] = useState<RTCPeerConnection>();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<string[]>([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function Home() {
 
   useEffect(() => {
     socket.on("chat-message", (arg) => {
-      setMessage(arg);
+      setMessages((messages) => [...messages, arg]);
     });
 
     return () => {
@@ -155,6 +155,8 @@ export default function Home() {
             onSubmit={(e) => {
               e.preventDefault();
               socket.emit("chat-message", message);
+              setMessage("");
+              setMessages((messages) => [...messages, message]);
             }}
           >
             <input
