@@ -137,12 +137,7 @@ export default function Home() {
           ref={localVideoRef}
           muted
         ></video>
-        <video
-          autoPlay
-          className="bg-green-500"
-          ref={remoteVideoRef}
-          muted
-        ></video>
+        <video autoPlay className="bg-green-500" ref={remoteVideoRef}></video>
         <button className="bg-blue-500 px-4 py-2" onClick={getMedia}>
           Cam & Audio
         </button>
