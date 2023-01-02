@@ -59,7 +59,9 @@ export default function Home() {
 
   const localVideoRef = useRef<null | HTMLVideoElement>(null);
   const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
-
+  
+  localVideoRef.style.webkitTransform = "scaleX(-1)";
+  localVideoRef.style.transform       = "scaleX(-1)";
   async function getMedia() {
     if (!pc) {
       return;
