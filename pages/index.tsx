@@ -152,8 +152,8 @@ export default function Home() {
 
         <div>
           <ul>
-            {messages.map((message) => (
-              <li>{message}</li>
+            {messages.map((message, i) => (
+              <li key={i}>{message}</li>
             ))}
           </ul>
           <form
