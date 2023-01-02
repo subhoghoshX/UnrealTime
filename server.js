@@ -36,6 +36,10 @@ nextApp.prepare().then(() => {
       socket.broadcast.emit("new-ice-candidate", arg);
     });
 
+    socket.on("chat-message", (message) => {
+      socket.broadcast.emit("chat-message", message);
+    });
+
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });

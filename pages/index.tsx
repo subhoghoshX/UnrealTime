@@ -9,6 +9,8 @@ let remoteStream: MediaStream;
 
 export default function Home() {
   const [pc, setPc] = useState<RTCPeerConnection>();
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!pc) {
@@ -56,6 +58,16 @@ export default function Home() {
       });
     }
   }, [pc]);
+
+  useEffect(() => {
+    socket.on("chat-message", (arg) => {
+      setMessage(arg);
+    });
+
+    return () => {
+      socket.removeAllListeners("chat-message");
+    };
+  }, []);
 
   const localVideoRef = useRef<null | HTMLVideoElement>(null);
   const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
@@ -119,14 +131,46 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-        <video autoPlay className="bg-red-500" ref={localVideoRef}></video>
-        <video autoPlay className="bg-green-500" ref={remoteVideoRef}></video>
+        <video
+          autoPlay
+          className="bg-red-500"
+          ref={localVideoRef}
+          muted
+        ></video>
+        <video
+          autoPlay
+          className="bg-green-500"
+          ref={remoteVideoRef}
+          muted
+        ></video>
         <button className="bg-blue-500 px-4 py-2" onClick={getMedia}>
           Cam & Audio
         </button>
         <button className="bg-indigo-500 px-4 py-2" onClick={connect}>
           Connect
         </button>
+
+        <div>
+          <ul>
+            {messages.map((message) => (
+              <li>{message}</li>
+            ))}
+          </ul>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              socket.emit("chat-message", message);
+            }}
+          >
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="border"
+            />
+            <button className="bg-blue-500 px-4 py-2">Send</button>
+          </form>
+        </div>
       </div>
     </div>
   );
