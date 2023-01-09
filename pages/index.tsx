@@ -71,6 +71,7 @@ export default function Home() {
 
   const localVideoRef = useRef<null | HTMLVideoElement>(null);
   const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
+  const screenCaptureVideoRef = useRef<null | HTMLVideoElement>(null);
 
   async function getMedia() {
     if (!pc) {
@@ -89,6 +90,15 @@ export default function Home() {
     pc.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
         remoteStream.addTrack(track);
+
+        if (screenCaptureVideoRef.current) {
+          const screenCaptureStream = new MediaStream();
+          const videos = remoteStream.getVideoTracks();
+          if (videos.length === 2) {
+            screenCaptureStream.addTrack(videos[1]);
+            screenCaptureVideoRef.current.srcObject = screenCaptureStream;
+          }
+        }
       });
       // remoteStream = track.streams[0];
     };
@@ -123,6 +133,21 @@ export default function Home() {
     console.log("send offer => ", offer);
   }
 
+  async function shareScreen() {
+    const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: false,
+    });
+
+    screenCaptureStream.getTracks().forEach((track) => {
+      pc?.addTrack(track, screenCaptureStream);
+    });
+
+    if (screenCaptureVideoRef.current) {
+      screenCaptureVideoRef.current.srcObject = screenCaptureStream;
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -143,11 +168,19 @@ export default function Home() {
             className="-scale-x-100 bg-green-500"
             ref={remoteVideoRef}
           ></video>
+          <video
+            autoPlay
+            className="bg-pink-500"
+            ref={screenCaptureVideoRef}
+          ></video>
           <button className="bg-blue-500 px-4 py-2" onClick={getMedia}>
             Cam & Audio
           </button>
           <button className="bg-indigo-500 px-4 py-2" onClick={connect}>
             Connect
+          </button>
+          <button className="bg-pink-500 px-4 py-2" onClick={shareScreen}>
+            Share Screen
           </button>
         </div>
 
