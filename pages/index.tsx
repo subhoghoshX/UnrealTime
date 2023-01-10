@@ -10,6 +10,12 @@ let localStream: MediaStream;
 let remoteStream: MediaStream;
 
 export default function Home() {
+  useEffect(() => {
+    if (!remoteStream) {
+      remoteStream = new MediaStream();
+    }
+  }, []);
+
   const [pc, setPc] = useState<RTCPeerConnection>();
 
   useEffect(() => {
@@ -29,6 +35,7 @@ export default function Home() {
     }
   }, []);
 
+  // Signalling Client
   useEffect(() => {
     if (pc) {
       socket.on("offer-event", async (offer) => {
@@ -59,23 +66,9 @@ export default function Home() {
     }
   }, [pc]);
 
-  const localVideoRef = useRef<null | HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
-  const screenCaptureVideoRef = useRef<null | HTMLVideoElement>(null);
-
-  async function getMedia() {
-    if (!pc) {
-      return;
-    }
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    remoteStream = new MediaStream();
-
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
-    });
+  // Attach listeners on the Peer connection
+  useEffect(() => {
+    if (!pc) return;
 
     pc.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
@@ -92,6 +85,24 @@ export default function Home() {
       });
       // remoteStream = track.streams[0];
     };
+  }, [pc]);
+
+  const localVideoRef = useRef<null | HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
+  const screenCaptureVideoRef = useRef<null | HTMLVideoElement>(null);
+
+  async function getMedia() {
+    if (!pc) {
+      return;
+    }
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    localStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localStream);
+    });
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
