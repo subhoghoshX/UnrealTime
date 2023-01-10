@@ -14,6 +14,10 @@ export default function Home() {
     if (!remoteStream) {
       remoteStream = new MediaStream();
     }
+
+    if (!localStream) {
+      localStream = new MediaStream();
+    }
   }, []);
 
   const [pc, setPc] = useState<RTCPeerConnection>();
@@ -112,17 +116,29 @@ export default function Home() {
     }
   }, [localVideoRef, remoteVideoRef]);
 
-  async function getMedia() {
+  async function getCamera() {
     if (!pc) {
       return;
     }
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+    const videoStream = await navigator.mediaDevices.getUserMedia({
+      // audio: true,
       video: true,
     });
 
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
+    videoStream.getTracks().forEach((track) => {
+      localStream.addTrack(track);
+      pc.addTrack(track, videoStream);
+    });
+  }
+
+  async function getAudio() {
+    const audioStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+
+    audioStream.getTracks().forEach((track) => {
+      localStream.addTrack(track); // maybe not necessary, as it'll be muted anyway
+      pc?.addTrack(track, audioStream);
     });
   }
 
@@ -174,8 +190,11 @@ export default function Home() {
             className="bg-pink-500"
             ref={screenCaptureVideoRef}
           ></video>
-          <button className="bg-blue-500 px-4 py-2" onClick={getMedia}>
-            Cam & Audio
+          <button className="bg-cyan-500 px-4 py-2" onClick={getCamera}>
+            Cam
+          </button>
+          <button className="bg-blue-500 px-4 py-2" onClick={getAudio}>
+            Audio
           </button>
           <button className="bg-indigo-500 px-4 py-2" onClick={connect}>
             Connect
