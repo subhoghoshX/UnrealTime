@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Chat from "../components/Chat";
+import negotiate from "../utils/negotiate";
 
 const socket = io();
 
@@ -113,13 +114,11 @@ export default function Home() {
       }
     };
 
-    const offer = await pc.createOffer();
-    // fuck await
-    await pc.setLocalDescription(offer);
+    negotiate(pc, socket);
 
-    socket.emit("offer-event", offer);
-
-    console.log("send offer => ", offer);
+    pc.onnegotiationneeded = () => {
+      negotiate(pc, socket);
+    };
   }
 
   async function shareScreen() {
