@@ -102,6 +102,16 @@ export default function Home() {
   const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
   const screenCaptureVideoRef = useRef<null | HTMLVideoElement>(null);
 
+  useEffect(() => {
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+    }
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [localVideoRef, remoteVideoRef]);
+
   async function getMedia() {
     if (!pc) {
       return;
@@ -114,14 +124,6 @@ export default function Home() {
     localStream.getTracks().forEach((track) => {
       pc.addTrack(track, localStream);
     });
-
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
-    }
-
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
   }
 
   async function connect() {
