@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import Chat from "../components/Chat";
 
 const socket = io();
 
@@ -9,8 +10,6 @@ let remoteStream: MediaStream;
 
 export default function Home() {
   const [pc, setPc] = useState<RTCPeerConnection>();
-  const [messages, setMessages] = useState<string[]>([]);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!pc) {
@@ -58,16 +57,6 @@ export default function Home() {
       });
     }
   }, [pc]);
-
-  useEffect(() => {
-    socket.on("chat-message", (arg) => {
-      setMessages((messages) => [...messages, arg]);
-    });
-
-    return () => {
-      socket.removeAllListeners("chat-message");
-    };
-  }, []);
 
   const localVideoRef = useRef<null | HTMLVideoElement>(null);
   const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
@@ -184,29 +173,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="flex flex-col border-l border-black">
-          <ul className="flex-grow overflow-auto p-5">
-            {messages.map((message, i) => (
-              <li key={i}>{message}</li>
-            ))}
-          </ul>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              socket.emit("chat-message", message);
-              setMessage("");
-              setMessages((messages) => [...messages, message]);
-            }}
-          >
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="border"
-            />
-            <button className="bg-blue-500 px-4 py-2">Send</button>
-          </form>
-        </div>
+        <Chat socket={socket} />
       </div>
     </div>
   );
