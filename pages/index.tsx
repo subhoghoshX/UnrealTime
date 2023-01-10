@@ -85,6 +85,17 @@ export default function Home() {
       });
       // remoteStream = track.streams[0];
     };
+
+    pc.onicecandidate = (event) => {
+      // console.log("ice candidate => ", event.candidate);
+      if (event.candidate) {
+        socket.emit("new-ice-candidate", event.candidate.toJSON());
+      }
+    };
+
+    pc.onnegotiationneeded = () => {
+      negotiate(pc, socket);
+    };
   }, [pc]);
 
   const localVideoRef = useRef<null | HTMLVideoElement>(null);
@@ -118,18 +129,7 @@ export default function Home() {
       return;
     }
 
-    pc.onicecandidate = (event) => {
-      // console.log("ice candidate => ", event.candidate);
-      if (event.candidate) {
-        socket.emit("new-ice-candidate", event.candidate.toJSON());
-      }
-    };
-
     negotiate(pc, socket);
-
-    pc.onnegotiationneeded = () => {
-      negotiate(pc, socket);
-    };
   }
 
   async function shareScreen() {
