@@ -6,20 +6,27 @@ import negotiate from "../utils/negotiate";
 
 const socket = io();
 
-let localStream: MediaStream;
-let remoteStream: MediaStream;
-
 export default function Home() {
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+
+  // initialize localStream, remoteStream & screenStream
   useEffect(() => {
     if (!remoteStream) {
-      remoteStream = new MediaStream();
+      setRemoteStream(new MediaStream());
     }
 
     if (!localStream) {
-      localStream = new MediaStream();
+      setLocalStream(new MediaStream());
+    }
+
+    if (!screenStream) {
+      setScreenStream(new MediaStream());
     }
   }, []);
 
+  // Peer Connection
   const [pc, setPc] = useState<RTCPeerConnection>();
 
   useEffect(() => {
@@ -72,15 +79,11 @@ export default function Home() {
 
     pc.ontrack = (event) => {
       event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
+        remoteStream?.addTrack(track);
 
-        if (screenCaptureVideoRef.current) {
-          const screenCaptureStream = new MediaStream();
-          const videos = remoteStream.getVideoTracks();
-          if (videos.length === 2) {
-            screenCaptureStream.addTrack(videos[1]);
-            screenCaptureVideoRef.current.srcObject = screenCaptureStream;
-          }
+        const videos = remoteStream?.getVideoTracks();
+        if (videos?.length === 2) {
+          screenStream?.addTrack(videos[1]);
         }
       });
     };
@@ -96,20 +99,6 @@ export default function Home() {
     };
   }, [pc]);
 
-  const localVideoRef = useRef<null | HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<null | HTMLVideoElement>(null);
-  const screenCaptureVideoRef = useRef<null | HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
-    }
-
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [localVideoRef, remoteVideoRef]);
-
   async function getCamera() {
     if (!pc) {
       return;
@@ -119,7 +108,7 @@ export default function Home() {
     });
 
     videoStream.getTracks().forEach((track) => {
-      localStream.addTrack(track);
+      localStream?.addTrack(track);
       pc.addTrack(track, videoStream);
     });
   }
@@ -130,7 +119,7 @@ export default function Home() {
     });
 
     audioStream.getTracks().forEach((track) => {
-      localStream.addTrack(track); // maybe not necessary, as it'll be muted anyway
+      localStream?.addTrack(track); // maybe not necessary, as it'll be muted anyway
       pc?.addTrack(track, audioStream);
     });
   }
@@ -150,12 +139,9 @@ export default function Home() {
     });
 
     screenCaptureStream.getTracks().forEach((track) => {
+      screenStream?.addTrack(track);
       pc?.addTrack(track, screenCaptureStream);
     });
-
-    if (screenCaptureVideoRef.current) {
-      screenCaptureVideoRef.current.srcObject = screenCaptureStream;
-    }
   }
 
   return (
@@ -170,18 +156,30 @@ export default function Home() {
           <video
             autoPlay
             className="-scale-x-100 bg-red-500"
-            ref={localVideoRef}
+            ref={(elem) => {
+              if (elem) {
+                elem.srcObject = localStream;
+              }
+            }}
             muted
           ></video>
           <video
             autoPlay
             className="-scale-x-100 bg-green-500"
-            ref={remoteVideoRef}
+            ref={(elem) => {
+              if (elem) {
+                elem.srcObject = remoteStream;
+              }
+            }}
           ></video>
           <video
             autoPlay
             className="bg-pink-500"
-            ref={screenCaptureVideoRef}
+            ref={(elem) => {
+              if (elem) {
+                elem.srcObject = screenStream;
+              }
+            }}
           ></video>
           <button className="bg-cyan-500 px-4 py-2" onClick={getCamera}>
             Cam
