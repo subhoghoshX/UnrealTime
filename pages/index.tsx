@@ -57,14 +57,10 @@ export default function Home() {
         if (offer.type === "answer") {
           console.log("received answer => ", offer);
         }
-        // console.log("offer => ", offer);
-        // console.log("type => ", pc.remoteDescription, pc);
       });
 
-      // ice candiates
       socket.on("new-ice-candidate", (message) => {
         console.log("iceCAndiate =>", message);
-        // console.log(new RTCIceCandidate(message.candidate));
         pc.addIceCandidate(new RTCIceCandidate(message));
       });
     }
@@ -87,11 +83,9 @@ export default function Home() {
           }
         }
       });
-      // remoteStream = track.streams[0];
     };
 
     pc.onicecandidate = (event) => {
-      // console.log("ice candidate => ", event.candidate);
       if (event.candidate) {
         socket.emit("new-ice-candidate", event.candidate.toJSON());
       }
@@ -121,7 +115,6 @@ export default function Home() {
       return;
     }
     const videoStream = await navigator.mediaDevices.getUserMedia({
-      // audio: true,
       video: true,
     });
 
