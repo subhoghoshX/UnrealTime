@@ -20,7 +20,7 @@ export default function Chat({ socket }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col border-l border-black">
+    <div className="flex h-full flex-col border-l border-white text-white">
       <ul className="flex-grow overflow-auto p-5">
         {messages.map((message, i) => (
           <li key={i}>{message}</li>
