@@ -3,13 +3,29 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Chat from "../components/Chat";
 import negotiate from "../utils/negotiate";
-import { BsCameraVideoOff, BsMicMute } from "react-icons/bs";
+import {
+  BsCameraVideo,
+  BsCameraVideoOff,
+  BsMic,
+  BsMicMute,
+} from "react-icons/bs";
 import { MdConnectedTv, MdOutlineScreenShare } from "react-icons/md";
+import clsx from "clsx";
 
 const socket = io();
 
+type Senders = {
+  audio?: RTCRtpSender;
+  video?: RTCRtpSender;
+};
+
 export default function Home() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [localStreamSenders, setLocalStreamSenders] = useState<Senders | null>(
+    null,
+  );
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(false);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
 
@@ -80,14 +96,16 @@ export default function Home() {
     if (!pc) return;
 
     pc.ontrack = (event) => {
+      const tempStream = new MediaStream();
       event.streams[0].getTracks().forEach((track) => {
-        remoteStream?.addTrack(track);
+        tempStream?.addTrack(track);
 
         const videos = remoteStream?.getVideoTracks();
         if (videos?.length === 2) {
           screenStream?.addTrack(videos[1]);
         }
       });
+      setRemoteStream(tempStream);
     };
 
     pc.onicecandidate = (event) => {
@@ -111,9 +129,23 @@ export default function Home() {
 
     videoStream.getTracks().forEach((track) => {
       localStream?.addTrack(track);
-      pc.addTrack(track, videoStream);
+      const sender = pc.addTrack(track, videoStream);
+      setLocalStreamSenders((localStreamSenders) => ({
+        ...localStreamSenders,
+        video: sender,
+      }));
     });
   }
+
+  useEffect(() => {
+    if (videoEnabled) {
+      getCamera();
+    } else {
+      if (localStreamSenders?.video) {
+        pc?.removeTrack(localStreamSenders?.video);
+      }
+    }
+  }, [videoEnabled]);
 
   async function getAudio() {
     const audioStream = await navigator.mediaDevices.getUserMedia({
@@ -122,9 +154,23 @@ export default function Home() {
 
     audioStream.getTracks().forEach((track) => {
       localStream?.addTrack(track); // maybe not necessary, as it'll be muted anyway
-      pc?.addTrack(track, audioStream);
+      const sender = pc?.addTrack(track, audioStream);
+      setLocalStreamSenders((localStreamSenders) => ({
+        ...localStreamSenders,
+        audio: sender,
+      }));
     });
   }
+
+  useEffect(() => {
+    if (audioEnabled) {
+      getAudio();
+    } else {
+      if (localStreamSenders?.audio) {
+        pc?.removeTrack(localStreamSenders.audio);
+      }
+    }
+  }, [audioEnabled]);
 
   async function connect() {
     if (!pc) {
@@ -194,16 +240,32 @@ export default function Home() {
 
           <menu className="flex justify-center gap-3">
             <button
-              className="rounded-full bg-red-500 p-3.5 text-white hover:bg-red-400"
-              onClick={getCamera}
+              className={clsx(
+                "rounded-full p-3.5 text-white",
+                { "bg-red-500 hover:bg-red-400": !videoEnabled },
+                { "bg-zinc-700 hover:bg-zinc-600": videoEnabled },
+              )}
+              onClick={() => {
+                setVideoEnabled((videoEnabled) => !videoEnabled);
+              }}
             >
-              <BsCameraVideoOff className="h-5 w-5" />
+              {!videoEnabled && <BsCameraVideoOff className="h-5 w-5" />}
+              {videoEnabled && <BsCameraVideo className="h-5 w-5" />}
             </button>
             <button
-              className="rounded-full bg-red-500 p-3.5 text-white hover:bg-red-400"
-              onClick={getAudio}
+              className={clsx(
+                "rounded-full p-3.5 text-white",
+                { "bg-red-500 hover:bg-red-400": !audioEnabled },
+                { "bg-zinc-700 hover:bg-zinc-600": audioEnabled },
+              )}
+              onClick={() => {
+                setAudioEnabled((audioEnabled) => !audioEnabled);
+              }}
             >
-              <BsMicMute className="h-5 w-5" />
+              <BsMicMute
+                className={clsx("h-5 w-5", { hidden: audioEnabled })}
+              />
+              <BsMic className={clsx("h-5 w-5", { hidden: !audioEnabled })} />
             </button>
             <button
               className="rounded-full bg-zinc-700 p-3.5 text-white hover:bg-zinc-600"
