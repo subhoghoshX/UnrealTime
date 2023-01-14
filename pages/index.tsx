@@ -11,6 +11,7 @@ import {
 } from "react-icons/bs";
 import { MdConnectedTv, MdOutlineScreenShare } from "react-icons/md";
 import clsx from "clsx";
+import MediaButton from "../components/Button/MediaButton";
 
 const socket = io();
 
@@ -239,46 +240,30 @@ export default function Home() {
           </section>
 
           <menu className="flex justify-center gap-3">
-            <button
-              className={clsx(
-                "rounded-full p-3.5 text-white",
-                { "bg-red-500 hover:bg-red-400": !videoEnabled },
-                { "bg-zinc-700 hover:bg-zinc-600": videoEnabled },
-              )}
-              onClick={() => {
-                setVideoEnabled((videoEnabled) => !videoEnabled);
-              }}
-            >
-              {!videoEnabled && <BsCameraVideoOff className="h-5 w-5" />}
-              {videoEnabled && <BsCameraVideo className="h-5 w-5" />}
-            </button>
-            <button
-              className={clsx(
-                "rounded-full p-3.5 text-white",
-                { "bg-red-500 hover:bg-red-400": !audioEnabled },
-                { "bg-zinc-700 hover:bg-zinc-600": audioEnabled },
-              )}
-              onClick={() => {
-                setAudioEnabled((audioEnabled) => !audioEnabled);
-              }}
-            >
-              <BsMicMute
-                className={clsx("h-5 w-5", { hidden: audioEnabled })}
-              />
-              <BsMic className={clsx("h-5 w-5", { hidden: !audioEnabled })} />
-            </button>
-            <button
-              className="rounded-full bg-zinc-700 p-3.5 text-white hover:bg-zinc-600"
+            <MediaButton
+              enabled={videoEnabled}
+              onClick={() => setVideoEnabled((videoEnabled) => !videoEnabled)}
+              DisabledIcon={BsCameraVideoOff}
+              EnabledIcon={BsCameraVideo}
+              type="primary"
+            />
+            <MediaButton
+              enabled={audioEnabled}
+              onClick={() => setAudioEnabled((audioEnabled) => !audioEnabled)}
+              DisabledIcon={BsMicMute}
+              EnabledIcon={BsMic}
+              type="primary"
+            />
+            <MediaButton
               onClick={connect}
-            >
-              <MdConnectedTv className="h-5 w-5" />
-            </button>
-            <button
-              className="relative rounded-full bg-zinc-700 p-3.5 text-white hover:bg-zinc-600"
+              Icon={MdConnectedTv}
+              type="secondary"
+            />
+            <MediaButton
               onClick={shareScreen}
-            >
-              <MdOutlineScreenShare className="h-5 w-5" />
-            </button>
+              Icon={MdOutlineScreenShare}
+              type="secondary"
+            />
           </menu>
         </div>
 
