@@ -23,24 +23,39 @@ nextApp.prepare().then(() => {
     return handle(req, res);
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
+    async function getAllSockets() {
+      const sockets = await io.fetchSockets();
+      return sockets.map((socket) => socket.id);
+    }
+    const sockets = await getAllSockets();
+
+    io.emit("new-user-list", sockets);
+
     console.log("one user connected");
 
     socket.on("offer-event", (arg) => {
       // console.log(arg);
-      socket.broadcast.emit("offer-event", arg);
+      /* socket.broadcast.emit("offer-event", arg); */
+      io.to(arg.receiverId).emit("offer-event", arg);
       // io.emit("custom", "some unique");
     });
 
     socket.on("new-ice-candidate", (arg) => {
-      socket.broadcast.emit("new-ice-candidate", arg);
+      /* socket.broadcast.emit("new-ice-candidate", arg); */
+      console.log("forwarding candidate to", arg.receiverId);
+      io.to(arg.receiverId).emit("new-ice-candidate", arg);
     });
 
     socket.on("chat-message", (message) => {
       socket.broadcast.emit("chat-message", message);
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
+      // send down userlist again when someone disconnects
+      const sockets = await getAllSockets();
+
+      io.emit("new-user-list", sockets);
       console.log("user disconnected");
     });
   });
