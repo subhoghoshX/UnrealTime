@@ -35,14 +35,10 @@ nextApp.prepare().then(() => {
     console.log("one user connected");
 
     socket.on("offer-event", (arg) => {
-      // console.log(arg);
-      /* socket.broadcast.emit("offer-event", arg); */
       io.to(arg.receiverId).emit("offer-event", arg);
-      // io.emit("custom", "some unique");
     });
 
     socket.on("new-ice-candidate", (arg) => {
-      /* socket.broadcast.emit("new-ice-candidate", arg); */
       console.log("forwarding candidate to", arg.receiverId);
       io.to(arg.receiverId).emit("new-ice-candidate", arg);
     });

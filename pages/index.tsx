@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import Chat from "../components/Chat";
 import negotiate from "../utils/negotiate";
@@ -9,22 +9,12 @@ import {
   BsMic,
   BsMicMute,
 } from "react-icons/bs";
-import {
-  MdConnectedTv,
-  MdOutlineScreenShare,
-  MdOutlineStopScreenShare,
-} from "react-icons/md";
-import clsx from "clsx";
+import { MdOutlineScreenShare, MdOutlineStopScreenShare } from "react-icons/md";
 import MediaButton from "../components/Button/MediaButton";
 
 const socket = io({
   autoConnect: false,
 });
-
-type Senders = {
-  audio?: RTCRtpSender;
-  video?: RTCRtpSender;
-};
 
 type ConnectionDetail = {
   pc: RTCPeerConnection;
@@ -38,18 +28,9 @@ type ConnectionDetail = {
 
 export default function Home() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  /*
-  const [localStreamSenders, setLocalStreamSenders] = useState<Senders | null>(
-    null,
-  );
-  */
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [screenShareEnabled, setScreenShareEnabled] = useState(false);
-  /*
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
-  */
   const [users, setUsers] = useState<Record<string, ConnectionDetail>>({});
 
   // set socket it & populate user object
@@ -70,25 +51,9 @@ export default function Home() {
               ],
             });
 
-            //
             pc.ontrack = (event) => {
-              /*
-              const tempStream = new MediaStream();
-              event.streams[0].getTracks().forEach((track) => {
-                tempStream?.addTrack(track);
-
-                const videos = remoteStream?.getVideoTracks();
-                if (videos?.length === 2) {
-                  screenStream?.addTrack(videos[1]);
-                }
-              });
-              //setRemoteStream(tempStream);
-              console.log("what the users now?", users);
-              users[user].stream = tempStream;
-              */
               const stream = usersObj[user].stream;
               stream.getTracks().forEach((track) => {
-                //track.stop();
                 stream.removeTrack(track);
               });
               event.streams[0].getTracks().forEach((track) => {
@@ -110,7 +75,6 @@ export default function Home() {
             pc.onnegotiationneeded = () => {
               negotiate(pc, socket, socketId, user);
             };
-            //
 
             usersObj[user] = {
               pc,
@@ -181,113 +145,15 @@ export default function Home() {
       socket.removeAllListeners("offer-event");
       socket.removeAllListeners("new-ice-candidate");
       socket.removeAllListeners("connect");
-      /*
-      Object.values(users).forEach((user) => {
-        user.pc.close();
-      });
-      */
     };
   }, [users]);
 
-  // initialize localStream, remoteStream & screenStream
+  // initialize localStream
   useEffect(() => {
-    /*
-    if (!remoteStream) {
-      setRemoteStream(new MediaStream());
-    }
-    */
-
     if (!localStream) {
       setLocalStream(new MediaStream());
     }
-
-    /*
-    if (!screenStream) {
-      setScreenStream(new MediaStream());
-    }
-    */
   }, []);
-
-  // Peer Connection
-  /*
-  const [pc, setPc] = useState<RTCPeerConnection>();
-
-  useEffect(() => {
-    if (!pc) {
-      setPc(
-        new RTCPeerConnection({
-          iceServers: [
-            {
-              urls: [
-                "stun:stun1.l.google.com:19302",
-                "stun:stun2.l.google.com:19302",
-              ],
-            },
-          ],
-        }),
-      );
-    }
-  }, []);
-  */
-
-  // Signalling Client
-  /*
-  useEffect(() => {
-    if (pc) {
-      socket.on("offer-event", async (offer) => {
-        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-
-        if (offer.type === "offer") {
-          console.log("receive offer => ", offer);
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-
-          socket.emit("offer-event", answer);
-          console.log("send answer => ", answer);
-        }
-
-        if (offer.type === "answer") {
-          console.log("received answer => ", offer);
-        }
-      });
-
-      socket.on("new-ice-candidate", (message) => {
-        console.log("iceCAndiate =>", message);
-        pc.addIceCandidate(new RTCIceCandidate(message));
-      });
-    }
-  }, [pc]);
-  */
-
-  // Attach listeners on the Peer connection
-  /*
-  useEffect(() => {
-    if (!pc) return;
-
-    pc.ontrack = (event) => {
-      const tempStream = new MediaStream();
-      event.streams[0].getTracks().forEach((track) => {
-        tempStream?.addTrack(track);
-
-        const videos = remoteStream?.getVideoTracks();
-        if (videos?.length === 2) {
-          screenStream?.addTrack(videos[1]);
-        }
-      });
-      setRemoteStream(tempStream);
-    };
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("new-ice-candidate", event.candidate.toJSON());
-      }
-    };
-
-    pc.onnegotiationneeded = () => {
-      negotiate(pc, socket);
-    };
-  }, [pc]);
-  */
 
   async function getCamera() {
     const videoStream = await navigator.mediaDevices.getUserMedia({
@@ -296,13 +162,7 @@ export default function Home() {
 
     videoStream.getTracks().forEach((track) => {
       localStream?.addTrack(track);
-      /*
-      const sender = pc.addTrack(track, videoStream);
-      setLocalStreamSenders((localStreamSenders) => ({
-        ...localStreamSenders,
-        video: sender,
-      }));
-      */
+
       Object.values(users).forEach((user) => {
         const sender = user.pc.addTrack(track, localStream!);
         user.senders.video = sender;
@@ -314,11 +174,6 @@ export default function Home() {
     if (videoEnabled) {
       getCamera();
     } else {
-      /*
-      if (localStreamSenders?.video) {
-        pc?.removeTrack(localStreamSenders?.video);
-      }
-      */
       Object.values(users).forEach((user) => {
         if (user.senders.video) {
           user.pc.removeTrack(user.senders.video);
@@ -334,13 +189,6 @@ export default function Home() {
 
     audioStream.getTracks().forEach((track) => {
       localStream?.addTrack(track); // maybe not necessary, as it'll be muted anyway
-      /*
-      const sender = pc?.addTrack(track, audioStream);
-      setLocalStreamSenders((localStreamSenders) => ({
-        ...localStreamSenders,
-        audio: sender,
-      }));
-      */
 
       Object.values(users).forEach((user) => {
         const sender = user.pc.addTrack(track, localStream!);
@@ -353,9 +201,6 @@ export default function Home() {
     if (audioEnabled) {
       getAudio();
     } else {
-      /*
-      pc?.removeTrack(localStreamSenders.audio);
-      */
       Object.values(users).forEach((user) => {
         if (user.senders.audio) {
           user.pc.removeTrack(user.senders.audio);
@@ -364,16 +209,6 @@ export default function Home() {
     }
   }, [audioEnabled]);
 
-  /*
-  async function connect() {
-    if (!pc) {
-      return;
-    }
- 
-    negotiate(pc, socket);
-  }
-  */
-
   async function shareScreen() {
     const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
@@ -381,12 +216,6 @@ export default function Home() {
     });
 
     screenCaptureStream.getTracks().forEach((track) => {
-      /*
-      screenStream?.addTrack(track);
-      pc?.addTrack(track, screenCaptureStream);
-      */
-      track.contentHint = "screen share";
-
       localStream?.addTrack(track);
 
       Object.values(users).forEach((user) => {
@@ -443,19 +272,6 @@ export default function Home() {
                 ></video>
               </div>
             ))}
-            {/*
-            <div className="aspect-video">
-              <video
-                autoPlay
-                className="h-full w-full rounded bg-blue-500"
-                ref={(elem) => {
-                  if (elem) {
-                    elem.srcObject = screenStream;
-                  }
-                }}
-              ></video>
-            </div>
-            */}
           </section>
 
           <menu className="flex justify-center gap-3">
@@ -473,13 +289,6 @@ export default function Home() {
               EnabledIcon={BsMic}
               type="primary"
             />
-            {/*
-            <MediaButton
-              onClick={connect}
-              Icon={MdConnectedTv}
-              type="secondary"
-            />
-            */}
             <MediaButton
               enabled={screenShareEnabled}
               onClick={() => setScreenShareEnabled((enabled) => !enabled)}
