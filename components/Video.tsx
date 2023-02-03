@@ -2,9 +2,10 @@ interface Props {
   stream: MediaStream;
   name: string;
   id: string;
+  muted?: boolean;
 }
 
-export default function Video({ stream, name, id }: Props) {
+export default function Video({ stream, name, id, muted }: Props) {
   return (
     <div className="relative aspect-video">
       <video
@@ -15,7 +16,7 @@ export default function Video({ stream, name, id }: Props) {
             elem.srcObject = stream;
           }
         }}
-        muted
+        muted={muted}
       ></video>
       <p className="absolute bottom-2 left-3 text-white">
         {name}: {id}

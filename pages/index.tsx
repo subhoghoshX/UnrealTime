@@ -250,7 +250,7 @@ export default function Home() {
       <div className="flex h-screen justify-between bg-zinc-900">
         <div className="flex flex-grow flex-col p-5">
           <section className="grid flex-grow grid-cols-3 items-start gap-4">
-            <Video stream={localStream!} name={"You"} id={socket.id} />
+            <Video stream={localStream!} name={"You"} id={socket.id} muted />
             {Object.values(users).map((user, i) => (
               <Video
                 key={i}
