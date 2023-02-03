@@ -11,6 +11,7 @@ import {
 } from "react-icons/bs";
 import { MdOutlineScreenShare, MdOutlineStopScreenShare } from "react-icons/md";
 import MediaButton from "../components/Button/MediaButton";
+import Video from "../components/Video";
 
 const socket = io({
   autoConnect: false,
@@ -24,6 +25,7 @@ type ConnectionDetail = {
     audio: RTCRtpSender | null;
     screenShare: RTCRtpSender | null;
   };
+  userId: string;
 };
 
 export default function Home() {
@@ -84,6 +86,7 @@ export default function Home() {
                 video: null,
                 screenShare: null,
               },
+              userId: user,
             };
           }
         });
@@ -247,30 +250,14 @@ export default function Home() {
       <div className="flex h-screen justify-between bg-zinc-900">
         <div className="flex flex-grow flex-col p-5">
           <section className="grid flex-grow grid-cols-3 items-start gap-4">
-            <div className="aspect-video">
-              <video
-                autoPlay
-                className="h-full w-full -scale-x-100 rounded bg-red-500"
-                ref={(elem) => {
-                  if (elem) {
-                    elem.srcObject = localStream;
-                  }
-                }}
-                muted
-              ></video>
-            </div>
+            <Video stream={localStream!} name={"You"} id={socket.id} />
             {Object.values(users).map((user, i) => (
-              <div className="aspect-video" key={i}>
-                <video
-                  autoPlay
-                  className="h-full w-full -scale-x-100 rounded bg-green-500"
-                  ref={(elem) => {
-                    if (elem) {
-                      elem.srcObject = user.stream;
-                    }
-                  }}
-                ></video>
-              </div>
+              <Video
+                key={i}
+                stream={user.stream}
+                name={"User"}
+                id={user.userId}
+              />
             ))}
           </section>
 
