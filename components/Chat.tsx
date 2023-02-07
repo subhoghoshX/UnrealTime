@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import getNow from "../utils/getNow";
+import { HiPaperAirplane } from "react-icons/hi2";
 
 interface Props {
   socket: Socket;
@@ -28,8 +29,8 @@ export default function Chat({ socket }: Props) {
 
   return (
     <div className="h-full p-4">
-      <div className="flex h-full w-80 flex-col rounded-md bg-white p-3">
-        <ul className="flex-grow space-y-3 overflow-auto p-5">
+      <div className="flex h-full w-80 flex-col rounded-md bg-white px-1 pt-2">
+        <ul className="thin-scroll flex-grow space-y-3 overflow-y-scroll p-2">
           {messages.map(({ text, senderId }, i) => (
             <li
               key={i}
@@ -39,7 +40,7 @@ export default function Chat({ socket }: Props) {
               })}
             >
               <p
-                className={clsx("rounded-xl px-3 py-1", {
+                className={clsx("rounded-xl px-3 py-1.5", {
                   "rounded-bl-none bg-zinc-200": socket.id !== senderId,
                   "rounded-br-none bg-orange-200": socket.id === senderId,
                 })}
@@ -52,29 +53,33 @@ export default function Chat({ socket }: Props) {
             </li>
           ))}
         </ul>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            socket.emit("chat-message", {
-              text: messageText,
-              senderId: socket.id,
-            });
-            setMessageText("");
-            setMessages((messages) => [
-              ...messages,
-              { text: messageText, senderId: socket.id },
-            ]);
-          }}
-          className="flex shrink-0 overflow-hidden rounded-lg"
-        >
-          <input
-            type="text"
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            className="h-full rounded-l-lg border border-r-0 px-3 py-1 focus:outline-none"
-          />
-          <button className="bg-blue-500 px-4 py-2">Send</button>
-        </form>
+        <section className="px-1 py-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              socket.emit("chat-message", {
+                text: messageText,
+                senderId: socket.id,
+              });
+              setMessageText("");
+              setMessages((messages) => [
+                ...messages,
+                { text: messageText, senderId: socket.id },
+              ]);
+            }}
+            className="relative shrink-0"
+          >
+            <input
+              type="text"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              className="w-full rounded-full border border-zinc-300 py-2.5 pl-4 pr-14 focus:outline-none"
+            />
+            <button className="absolute inset-y-1.5 right-2 rounded-full bg-blue-500 py-2 px-3 text-white hover:bg-blue-600">
+              <HiPaperAirplane />
+            </button>
+          </form>
+        </section>
       </div>
     </div>
   );
