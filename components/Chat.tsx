@@ -6,14 +6,16 @@ import { HiPaperAirplane } from "react-icons/hi2";
 
 interface Props {
   socket: Socket;
+  userName: string;
 }
 
 interface Message {
   text: string;
   senderId: string;
+  username: string;
 }
 
-export default function Chat({ socket }: Props) {
+export default function Chat({ socket, userName }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
 
@@ -31,7 +33,7 @@ export default function Chat({ socket }: Props) {
     <div className="h-full p-4">
       <div className="flex h-full w-80 flex-col rounded-md bg-white px-1 pt-2">
         <ul className="thin-scroll flex-grow space-y-3 overflow-y-scroll p-2">
-          {messages.map(({ text, senderId }, i) => (
+          {messages.map(({ text, senderId, username }, i) => (
             <li
               key={i}
               className={clsx("flex flex-col", {
@@ -48,7 +50,7 @@ export default function Chat({ socket }: Props) {
                 {text}
               </p>
               <p className="text-xs text-zinc-700">
-                <span className="">Mayank</span>
+                <span className="">{username}</span>
               </p>
             </li>
           ))}
@@ -60,11 +62,12 @@ export default function Chat({ socket }: Props) {
               socket.emit("chat-message", {
                 text: messageText,
                 senderId: socket.id,
+                username: userName,
               });
               setMessageText("");
               setMessages((messages) => [
                 ...messages,
-                { text: messageText, senderId: socket.id },
+                { text: messageText, senderId: socket.id, username: userName },
               ]);
             }}
             className="relative shrink-0"

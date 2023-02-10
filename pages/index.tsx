@@ -329,7 +329,7 @@ export default function Home() {
         </div>
 
         <div className="shrink-0">
-          <Chat socket={socket} />
+          <Chat socket={socket} userName={userName} />
         </div>
       </div>
     </div>
