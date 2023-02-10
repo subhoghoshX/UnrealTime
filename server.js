@@ -26,7 +26,10 @@ nextApp.prepare().then(() => {
   io.on("connection", async (socket) => {
     async function getAllSockets() {
       const sockets = await io.fetchSockets();
-      return sockets.map((socket) => socket.id);
+      return sockets.map((socket) => ({
+        userId: socket.id,
+        username: socket.handshake.auth.username,
+      }));
     }
     const sockets = await getAllSockets();
 
