@@ -13,6 +13,7 @@ import { MdOutlineScreenShare, MdOutlineStopScreenShare } from "react-icons/md";
 import MediaButton from "../components/Button/MediaButton";
 import Video from "../components/Video";
 import clsx from "clsx";
+import { HiChatBubbleBottomCenterText } from "react-icons/hi2";
 
 const socket = io({
   autoConnect: false,
@@ -43,6 +44,7 @@ export default function Home() {
   const [users, setUsers] = useState<Record<string, ConnectionDetail>>({});
   const [userName, setUserName] = useState("");
   const [showJoinScreen, setShowJoinScreen] = useState(true);
+  const [showChat, setShowChat] = useState(false);
 
   // set socket it & populate user object
   useEffect(() => {
@@ -289,7 +291,7 @@ export default function Home() {
         </form>
       </div>
 
-      <div className="flex h-screen justify-between bg-zinc-900">
+      <div className="relative flex h-screen justify-between overflow-hidden bg-zinc-900">
         <div className="flex flex-grow flex-col">
           <div className="thin-scroll flex-grow overflow-auto p-5 pb-px">
             <section className="grid flex-grow grid-cols-3 items-start gap-4">
@@ -331,10 +333,21 @@ export default function Home() {
               DisabledIcon={MdOutlineStopScreenShare}
               type="primary"
             />
+            <MediaButton
+              onClick={() => setShowChat((showChat) => !showChat)}
+              Icon={HiChatBubbleBottomCenterText}
+              type="secondary"
+              className="absolute right-5"
+            />
           </menu>
         </div>
 
-        <div className="shrink-0">
+        <div
+          className={clsx(
+            "absolute right-0 bottom-20 top-0 shrink-0 transition-transform sm:static sm:translate-x-0",
+            { "translate-x-full": !showChat },
+          )}
+        >
           <Chat socket={socket} userName={userName} />
         </div>
       </div>

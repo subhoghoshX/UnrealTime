@@ -3,6 +3,7 @@ import type { IconType } from "react-icons";
 
 interface CommonProps {
   onClick: () => void;
+  className?: string;
 }
 
 interface PrimaryProps extends CommonProps {
@@ -37,11 +38,11 @@ export default function MediaButton(props: Props) {
       </button>
     );
   } else {
-    const { onClick, Icon } = props;
+    const { onClick, Icon, className } = props;
 
     return (
       <button
-        className="rounded-full bg-zinc-700 p-3.5 text-white hover:bg-zinc-600"
+        className={`rounded-full bg-zinc-700 p-3.5 text-white hover:bg-zinc-600 ${className}`}
         onClick={onClick}
       >
         <Icon className="h-5 w-5" />
