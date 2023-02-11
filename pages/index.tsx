@@ -290,21 +290,23 @@ export default function Home() {
       </div>
 
       <div className="flex h-screen justify-between bg-zinc-900">
-        <div className="flex flex-grow flex-col p-5">
-          <section className="grid flex-grow grid-cols-3 items-start gap-4">
-            <Video stream={localStream!} name={"You"} id={socket.id} muted />
-            {Object.values(users).map((user, i) => (
-              <Video
-                key={i}
-                stream={user.stream}
-                name={user.username}
-                id={user.userId}
-              />
-            ))}
-          </section>
+        <div className="flex flex-grow flex-col">
+          <div className="thin-scroll flex-grow overflow-auto p-5 pb-px">
+            <section className="grid flex-grow grid-cols-3 items-start gap-4">
+              <Video stream={localStream!} name={"You"} id={socket.id} muted />
+              {Object.values(users).map((user, i) => (
+                <Video
+                  key={i}
+                  stream={user.stream}
+                  name={user.username}
+                  id={user.userId}
+                />
+              ))}
+            </section>
+          </div>
 
-          <menu className="relative flex justify-center gap-3">
-            <hgroup className="absolute left-0 text-white">
+          <menu className="relative flex justify-center gap-3 p-5">
+            <hgroup className="absolute left-5 text-white">
               <h1 className="font-bold">{userName}</h1>
               <p>{socket.id}</p>
             </hgroup>
