@@ -303,7 +303,11 @@ export default function Home() {
             ))}
           </section>
 
-          <menu className="flex justify-center gap-3">
+          <menu className="relative flex justify-center gap-3">
+            <hgroup className="absolute left-0 text-white">
+              <h1 className="font-bold">{userName}</h1>
+              <p>{socket.id}</p>
+            </hgroup>
             <MediaButton
               enabled={videoEnabled}
               onClick={() => setVideoEnabled((videoEnabled) => !videoEnabled)}

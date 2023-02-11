@@ -18,9 +18,7 @@ export default function Video({ stream, name, id, muted }: Props) {
         }}
         muted={muted}
       ></video>
-      <p className="absolute bottom-2 left-3 text-white">
-        {name}: {id}
-      </p>
+      <p className="absolute bottom-2 left-3 font-bold text-white">{name}</p>
     </div>
   );
 }

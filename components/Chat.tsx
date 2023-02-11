@@ -42,7 +42,7 @@ export default function Chat({ socket, userName }: Props) {
               })}
             >
               <p
-                className={clsx("rounded-xl px-3 py-1.5", {
+                className={clsx("break-all rounded-xl px-3 py-1.5", {
                   "rounded-bl-none bg-zinc-200": socket.id !== senderId,
                   "rounded-br-none bg-orange-200": socket.id === senderId,
                 })}
