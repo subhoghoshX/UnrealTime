@@ -1,11 +1,14 @@
+import { BsMicMute } from "react-icons/bs";
+
 interface Props {
   stream: MediaStream;
   name: string;
   id: string;
   muted?: boolean;
+  showMute: boolean;
 }
 
-export default function Video({ stream, name, id, muted }: Props) {
+export default function Video({ stream, name, id, muted, showMute }: Props) {
   return (
     <div className="relative aspect-video">
       <video
@@ -19,6 +22,9 @@ export default function Video({ stream, name, id, muted }: Props) {
         muted={muted}
       ></video>
       <p className="absolute bottom-2 left-3 font-bold text-white">{name}</p>
+      <div className="absolute bottom-2 right-3 text-white">
+        {showMute && <BsMicMute />}
+      </div>
     </div>
   );
 }

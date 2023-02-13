@@ -29,6 +29,7 @@ type ConnectionDetail = {
   };
   userId: string;
   username: string;
+  muted: boolean;
 };
 
 type User = {
@@ -99,6 +100,7 @@ export default function Home() {
               },
               userId,
               username,
+              muted: true,
             };
           }
         });
@@ -138,6 +140,13 @@ export default function Home() {
           receiverId: senderId,
         });
         console.log("send answer => ", answer);
+
+        // check if muted
+        const muted = users[senderId].stream.getAudioTracks()[0].muted;
+        setUsers((oldUsers) => ({
+          ...oldUsers,
+          [senderId]: { ...oldUsers[senderId], muted },
+        }));
       }
 
       if (offer.type === "answer") {
@@ -295,13 +304,20 @@ export default function Home() {
         <div className="flex flex-grow flex-col">
           <div className="thin-scroll flex-grow overflow-auto p-5 pb-px">
             <section className="grid flex-grow grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <Video stream={localStream!} name={"You"} id={socket.id} muted />
+              <Video
+                stream={localStream!}
+                name={"You"}
+                id={socket.id}
+                muted
+                showMute={!audioEnabled}
+              />
               {Object.values(users).map((user, i) => (
                 <Video
                   key={i}
                   stream={user.stream}
                   name={user.username}
                   id={user.userId}
+                  showMute={user.muted}
                 />
               ))}
             </section>
