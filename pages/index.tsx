@@ -294,7 +294,7 @@ export default function Home() {
       <div className="relative flex h-screen justify-between overflow-hidden bg-zinc-900">
         <div className="flex flex-grow flex-col">
           <div className="thin-scroll flex-grow overflow-auto p-5 pb-px">
-            <section className="grid flex-grow grid-cols-3 items-start gap-4">
+            <section className="grid flex-grow grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
               <Video stream={localStream!} name={"You"} id={socket.id} muted />
               {Object.values(users).map((user, i) => (
                 <Video
@@ -308,7 +308,7 @@ export default function Home() {
           </div>
 
           <menu className="relative flex justify-center gap-3 p-5">
-            <hgroup className="absolute left-5 text-white">
+            <hgroup className="absolute left-5 hidden text-white lg:block">
               <h1 className="font-bold">{userName}</h1>
               <p>{socket.id}</p>
             </hgroup>
@@ -337,7 +337,7 @@ export default function Home() {
               onClick={() => setShowChat((showChat) => !showChat)}
               Icon={HiChatBubbleBottomCenterText}
               type="secondary"
-              className="absolute right-5"
+              className="absolute right-5 sm:hidden"
             />
           </menu>
         </div>
