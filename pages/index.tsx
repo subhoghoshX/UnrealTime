@@ -74,6 +74,7 @@ export default function Home() {
                 stream.addTrack(track);
               });
               console.log(stream.getTracks());
+              stream.dispatchEvent(new TrackEvent("addtrack"));
             };
 
             pc.onicecandidate = (event) => {
