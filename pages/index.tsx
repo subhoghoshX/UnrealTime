@@ -143,10 +143,10 @@ export default function Home() {
         console.log("send answer => ", answer);
 
         // check if muted
-        const muted = users[senderId].stream.getAudioTracks()[0].muted;
+        const muted = users[senderId].stream.getAudioTracks()[0]?.muted;
         setUsers((oldUsers) => ({
           ...oldUsers,
-          [senderId]: { ...oldUsers[senderId], muted },
+          [senderId]: { ...oldUsers[senderId], muted: muted ?? true },
         }));
       }
 
