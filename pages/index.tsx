@@ -74,6 +74,7 @@ export default function Home() {
                 stream.addTrack(track);
               });
               console.log(stream.getTracks());
+              stream.dispatchEvent(new TrackEvent("addtrack"));
             };
 
             pc.onicecandidate = (event) => {
@@ -211,6 +212,7 @@ export default function Home() {
 
     audioStream.getTracks().forEach((track) => {
       localStream?.addTrack(track); // maybe not necessary, as it'll be muted anyway
+      localStream?.dispatchEvent(new TrackEvent("addtrack"));
 
       Object.values(users).forEach((user) => {
         const sender = user.pc.addTrack(track, localStream!);
