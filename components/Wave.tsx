@@ -31,7 +31,7 @@ export default function Wave({ stream }: Props) {
             analyzer.getByteFrequencyData(dataArray);
             const arr = Array.from(dataArray);
             setFreqData(arr);
-          }, 100);
+          });
         }
       };
     }
@@ -42,11 +42,11 @@ export default function Wave({ stream }: Props) {
   }, [stream]);
 
   return (
-    <div className="flex items-center">
-      {freqData.map((data, i) => (
+    <div className="flex h-4 items-center gap-px">
+      {freqData.slice(0, 3).map((data, i) => (
         <div
-          className="w-2 bg-blue-500"
-          style={{ height: data / 10 }}
+          className="w-1 rounded-full bg-blue-500"
+          style={{ height: data / 16 > 9 ? data / 16 : 4 }}
           key={i}
         ></div>
       ))}
