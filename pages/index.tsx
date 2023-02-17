@@ -246,19 +246,28 @@ export default function Home() {
   }, [audioEnabled]);
 
   async function shareScreen() {
-    const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: false,
-    });
-
-    screenCaptureStream.getTracks().forEach((track) => {
-      localStream?.addTrack(track);
-
-      Object.values(users).forEach((user) => {
-        const sender = user.pc.addTrack(track, localStream!);
-        user.senders.screenShare = sender;
+    try {
+      const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
       });
-    });
+
+      screenCaptureStream.getTracks().forEach((track) => {
+        localStream?.addTrack(track);
+
+        Object.values(users).forEach((user) => {
+          const sender = user.pc.addTrack(track, localStream!);
+          user.senders.screenShare = sender;
+        });
+      });
+
+      screenCaptureStream.onremovetrack = () => {
+        console.log("track removed");
+      };
+    } catch (e: any) {
+      setErrorMessage(e.message);
+      setScreenShareEnabled(false);
+    }
   }
 
   useEffect(() => {
