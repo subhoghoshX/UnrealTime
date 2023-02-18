@@ -24,8 +24,11 @@ nextApp.prepare().then(() => {
   });
 
   io.on("connection", async (socket) => {
+    const room = socket.handshake.auth.room;
+    socket.join(room);
+
     async function getAllSockets() {
-      const sockets = await io.fetchSockets();
+      const sockets = await io.in(room).fetchSockets();
       return sockets.map((socket) => ({
         userId: socket.id,
         username: socket.handshake.auth.username,
@@ -33,7 +36,7 @@ nextApp.prepare().then(() => {
     }
     const sockets = await getAllSockets();
 
-    io.emit("new-user-list", sockets);
+    io.to(room).emit("new-user-list", sockets);
 
     console.log("one user connected");
 
@@ -47,14 +50,14 @@ nextApp.prepare().then(() => {
     });
 
     socket.on("chat-message", (message) => {
-      socket.broadcast.emit("chat-message", message);
+      socket.broadcast.to(room).emit("chat-message", message);
     });
 
     socket.on("disconnect", async () => {
       // send down userlist again when someone disconnects
       const sockets = await getAllSockets();
 
-      io.emit("new-user-list", sockets);
+      io.to(room).emit("new-user-list", sockets);
       console.log("user disconnected");
     });
   });

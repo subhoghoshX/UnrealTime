@@ -15,6 +15,7 @@ import Video from "../../components/Video";
 import clsx from "clsx";
 import { HiChatBubbleBottomCenterText } from "react-icons/hi2";
 import Error from "../../components/Error";
+import { useRouter } from "next/router";
 
 const socket = io({
   autoConnect: false,
@@ -48,6 +49,8 @@ export default function Room() {
   const [showJoinScreen, setShowJoinScreen] = useState(true);
   const [showChat, setShowChat] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const router = useRouter();
 
   // set socket it & populate user object
   useEffect(() => {
@@ -311,6 +314,7 @@ export default function Room() {
             setShowJoinScreen(false);
             socket.auth = {
               username: userName,
+              room: router.query.room,
             };
             socket.connect();
             socket.emit("join", userName);
