@@ -300,6 +300,10 @@ export default function Room() {
     if (screenShareEnabled) {
       shareScreen();
     } else {
+      // reset screen share track id
+      screenShareTrackIdRef.current = "";
+      forceUpdate();
+
       Object.values(users).forEach((user) => {
         if (user.senders.screenShare) {
           user.pc.removeTrack(user.senders.screenShare);
