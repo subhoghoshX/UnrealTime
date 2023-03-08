@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Chat from "../../components/Chat";
 import negotiate from "../../utils/negotiate";
@@ -50,6 +50,10 @@ export default function Room() {
   const [showChat, setShowChat] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+  const screenShareTrackIdRef = useRef("");
+
   const router = useRouter();
 
   // set socket it & populate user object
@@ -71,15 +75,20 @@ export default function Room() {
             });
 
             pc.ontrack = (event) => {
-              const stream = usersObj[userId].stream;
-              stream.getTracks().forEach((track) => {
-                stream.removeTrack(track);
+              setUsers((users) => {
+                const usersCopy = { ...users };
+                const stream = usersObj[userId].stream;
+                stream.getTracks().forEach((track) => {
+                  stream.removeTrack(track);
+                });
+                event.streams[0].getTracks().forEach((track) => {
+                  stream.addTrack(track);
+                });
+                console.log(stream.getTracks());
+                stream.dispatchEvent(new TrackEvent("addtrack"));
+
+                return usersCopy;
               });
-              event.streams[0].getTracks().forEach((track) => {
-                stream.addTrack(track);
-              });
-              console.log(stream.getTracks());
-              stream.dispatchEvent(new TrackEvent("addtrack"));
             };
 
             pc.onicecandidate = (event) => {
@@ -93,7 +102,13 @@ export default function Room() {
             };
 
             pc.onnegotiationneeded = () => {
-              negotiate(pc, socket, socketId, userId);
+              negotiate(
+                pc,
+                socket,
+                socketId,
+                userId,
+                screenShareTrackIdRef.current,
+              );
             };
 
             usersObj[userId] = {
@@ -123,7 +138,7 @@ export default function Room() {
     });
 
     //attach other socket listeners
-    socket.on("offer-event", async ({ offer, senderId }) => {
+    socket.on("offer-event", async ({ offer, senderId, ssTrackId }) => {
       // only a variable is enough
       const socketId = socket.id;
 
@@ -132,6 +147,9 @@ export default function Room() {
       );
 
       if (offer.type === "offer") {
+        // set screen share track id
+        screenShareTrackIdRef.current = ssTrackId;
+
         await users[senderId].pc.setRemoteDescription(
           new RTCSessionDescription(offer),
         );
@@ -191,6 +209,7 @@ export default function Room() {
 
       videoStream.getTracks().forEach((track) => {
         localStream?.addTrack(track);
+        forceUpdate();
 
         Object.values(users).forEach((user) => {
           const sender = user.pc.addTrack(track, localStream!);
@@ -257,6 +276,10 @@ export default function Room() {
 
       screenCaptureStream.getTracks().forEach((track) => {
         localStream?.addTrack(track);
+        forceUpdate();
+
+        // set screen share track id
+        screenShareTrackIdRef.current = track.id;
 
         Object.values(users).forEach((user) => {
           const sender = user.pc.addTrack(track, localStream!);
@@ -346,6 +369,7 @@ export default function Room() {
                 id={socket.id}
                 muted
                 showMute={!audioEnabled}
+                ssTrackId={screenShareTrackIdRef.current}
               />
               {Object.values(users).map((user, i) => (
                 <Video
@@ -354,6 +378,7 @@ export default function Room() {
                   name={user.username}
                   id={user.userId}
                   showMute={user.muted}
+                  ssTrackId={screenShareTrackIdRef.current}
                 />
               ))}
             </section>
