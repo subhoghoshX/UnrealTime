@@ -300,6 +300,12 @@ export default function Room() {
     if (screenShareEnabled) {
       shareScreen();
     } else {
+      const screenShareTrack = localStream?.getTrackById(
+        screenShareTrackIdRef.current,
+      );
+
+      screenShareTrack && localStream?.removeTrack(screenShareTrack);
+
       // reset screen share track id
       screenShareTrackIdRef.current = "";
       forceUpdate();
