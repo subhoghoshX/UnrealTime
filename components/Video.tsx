@@ -31,26 +31,25 @@ export default function Video({
   return (
     <>
       <div className="relative aspect-video rounded bg-zinc-700/90">
-        {camTrack ? (
-          <video
-            autoPlay
-            className="h-full w-full -scale-x-100"
-            ref={(elem) => {
-              if (elem) {
-                const camStream = new MediaStream();
+        <video
+          autoPlay
+          className="h-full w-full -scale-x-100"
+          ref={(elem) => {
+            if (elem) {
+              const camStream = new MediaStream();
 
-                const audioTrack = stream?.getAudioTracks()[0];
+              const audioTrack = stream?.getAudioTracks()[0];
 
-                camTrack && camStream.addTrack(camTrack);
-                audioTrack && camStream.addTrack(audioTrack);
+              camTrack && camStream.addTrack(camTrack);
+              audioTrack && camStream.addTrack(audioTrack);
 
-                elem.srcObject = camStream;
-              }
-            }}
-            muted={muted}
-          ></video>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
+              elem.srcObject = camStream;
+            }
+          }}
+          muted={muted}
+        ></video>
+        {!camTrack && (
+          <div className="absolute inset-0 flex items-center justify-center">
             <span className="aspect-square h-1/3">
               <svg viewBox="0 0 18 18">
                 <text x={4} y={15} fill="white">
