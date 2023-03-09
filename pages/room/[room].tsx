@@ -375,7 +375,7 @@ export default function Room() {
             <section className="grid flex-grow grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
               <Video
                 stream={localStream!}
-                name={"You"}
+                name={`${userName[0] ?? ""}/You`}
                 id={socket.id}
                 muted
                 showMute={!audioEnabled}
@@ -385,7 +385,7 @@ export default function Room() {
                 <Video
                   key={i}
                   stream={user.stream}
-                  name={user.username}
+                  name={`${user.username[0]}/${user.username}`}
                   id={user.userId}
                   showMute={user.muted}
                   ssTrackId={screenShareTrackIdRef.current}
